@@ -1,3 +1,8 @@
 #gameCanvas {
     border:2px solid #000000;
 }
+
+#game-container {
+    display: flex;
+    justify-content: center;
+}
