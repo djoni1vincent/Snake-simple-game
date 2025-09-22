@@ -1,27 +1,23 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-ctx.fillStyle = "silver";
-ctx.fillRect(0,0,300,300);
-
 const cellSize = 10;
 let dx = cellSize;
 let dy = 0;
 
-
 let snake = [  
-        {x: 150, y: 150},
-        {x: 140, y: 150},
-        {x: 130, y: 150},
-        {x: 120, y: 150},
-        {x: 110, y: 150},
-    ];
+    {x: 150, y: 150},
+    {x: 140, y: 150},
+    {x: 130, y: 150},
+    {x: 120, y: 150},
+    {x: 110, y: 150},
+];
 
 function drawSnakePart(snakePart) {
     ctx.fillStyle = "lightgreen"; 
     ctx.strokeStyle = "darkgreen";
-    ctx.fillRect(snakePart.x, snakePart.y, 10, 10); 
-    ctx.strokeRect(snakePart.x, snakePart.y, 10, 10); 
+    ctx.fillRect(snakePart.x, snakePart.y, cellSize, cellSize); 
+    ctx.strokeRect(snakePart.x, snakePart.y, cellSize, cellSize); 
 }
 
 function changeDirection(event) {
@@ -31,8 +27,8 @@ function changeDirection(event) {
     const DOWN_KEY = 40;
 
     const keyPressed = event.keyCode;
-    const goingUp = dy === 10;
-    const goingDown = dy === -10;
+    const goingUp = dy === -10;
+    const goingDown = dy === 10;
     const goingRight = dx === 10;
     const goingLeft = dx === -10;    
 
@@ -54,21 +50,22 @@ function advanceSnake () {
 };
 
 function clearCanvas() {
-    ctx.fillStyle = "white";
-    ctx.strokeStyle = "black";
-    ctx.fillRect(0,0, gameCanvas.width, gameCanvas.height);
-    ctx.strokeRect(0,0, gameCanvas.width, gameCanvas.height);
+    ctx.fillStyle = "black";
+    ctx.fillRect(0,0, canvas.width, canvas.height);
 }
 
-function drawSnake() {snake.forEach(drawSnakePart)};
+function drawSnake() {
+    snake.forEach(drawSnakePart);
+}
 
 function main() {
     setTimeout(function onTick() {  
-    clearCanvas();  
-    advanceSnake();  
-    drawSnake();main();}, 100);
+        clearCanvas();  
+        advanceSnake();  
+        drawSnake();
+        main();
+    }, 100);
 }
 
-document.addEventListener("keydown", changeDirection)
-
+document.addEventListener("keydown", changeDirection);
 main();
