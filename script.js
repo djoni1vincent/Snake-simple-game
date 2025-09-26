@@ -67,5 +67,14 @@ function main() {
     }, 100);
 }
 
+
+function randomTen(min, max){
+    return Mat.round((Math.random() * (min-max) + min) / 10) * 10;
+}
+function createFood() {
+    foodX = randomTen(0, gameCanvas.width - 10);
+    foodY = randomTen ()
+}
+
 document.addEventListener("keydown", changeDirection);
 main();
