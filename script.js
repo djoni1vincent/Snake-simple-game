@@ -36,20 +36,31 @@ function changeDirection(event) {
   const goingLeft = dx === -10;
 
   if (keyPressed === LEFT_KEY && !goingRight) {
-    dx = -10; dy = 0;
+    dx = -10;
+    dy = 0;
   } else if (keyPressed === UP_KEY && !goingDown) {
-    dx = 0; dy = -10;
+    dx = 0;
+    dy = -10;
   } else if (keyPressed === RIGHT_KEY && !goingLeft) {
-    dx = 10; dy = 0;
+    dx = 10;
+    dy = 0;
   } else if (keyPressed === DOWN_KEY && !goingUp) {
-    dx = 0; dy = 10;
+    dx = 0;
+    dy = 10;
   }
 }
 
 function advanceSnake() {
   const head = { x: snake[0].x + dx, y: snake[0].y + dy };
   snake.unshift(head);
-  snake.pop();
+  const didEatFood = snake[0].x === foodX && snake[0].y === foodY;
+  if (didEatFood) {
+    score += 10;
+    document.getElementById("score").innerHTML = score;
+    createFood();
+  } else {
+    snake.pop();
+  }
 }
 
 function clearCanvas() {
@@ -61,6 +72,9 @@ function drawSnake() {
   snake.forEach(drawSnakePart);
 }
 
+let score = 0;
+
+// mat
 function randomTen(min, max) {
   return Math.round((Math.random() * (max - min) + min) / 10) * 10;
 }
@@ -82,14 +96,28 @@ function drawFood(x, y) {
   ctx.strokeRect(x, y, 10, 10);
 }
 
+function didGameEnd() {
+  for (let i = 4; i < snake.length; i++) {
+    const didCollide = snake[i].x === snake[0].x && snake[i].y === snake[0].y;
+    if (didCollide) return true;
+  }
+  const hitLeftWall = snake[0].x < 0;
+  const hitRightWall = snake[0].x > gameCanvas.width - 10;
+  const hitToptWall = snake[0].y < 0;
+  const hitBottomWall = snake[0].y > gameCanvas.height - 10;
+  return hitLeftWall || hitRightWall || hitToptWall || hitBottomWall;
+}
+
 function main() {
+  if (didGameEnd()) return;
+
   setTimeout(function onTick() {
     clearCanvas();
     drawFood(foodX, foodY);
     advanceSnake();
     drawSnake();
     main();
-  }, 150);
+  }, 100);
 }
 
 document.addEventListener("keydown", changeDirection);
