@@ -57,3 +57,17 @@ h1 {
   background: #00cc77;
   transform: scale(1.05);
 }
+
+#you-died {
+  position: absolute;
+  top: 53%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 3em;
+  font-family: "Cinzel", serif;
+  color: red;
+  text-shadow: 0 0 25px red, 0 0 50px darkred;
+  opacity: 0;
+  transition: opacity 2s ease;
+  pointer-events: none;
+}

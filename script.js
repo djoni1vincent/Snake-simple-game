@@ -1,14 +1,14 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
-
-let resetBtn = document.getElementById("reset")
+const resetBtn = document.getElementById("reset");
+const youDiedText = document.getElementById("you-died");
 
 const cellSize = 10;
 let dx = cellSize;
 let dy = 0;
-
-let foodX;
-let foodY;
+let speed = 100;
+let score = 0;
+let gameOver = false;
 
 let snake = [
   { x: 150, y: 150 },
@@ -18,57 +18,46 @@ let snake = [
   { x: 110, y: 150 },
 ];
 
-function drawSnakePart(snakePart) {
-  ctx.fillStyle = "lightgreen";
-  ctx.strokeStyle = "darkgreen";
-  ctx.fillRect(snakePart.x, snakePart.y, cellSize, cellSize);
-  ctx.strokeRect(snakePart.x, snakePart.y, cellSize, cellSize);
+let foodX;
+let foodY;
+let snakeColor = "lime";
+
+document.addEventListener("keydown", changeDirection);
+resetBtn.addEventListener("click", resetGame);
+document.addEventListener("keydown", (e) => {
+  if (e.key === "r" || e.key === "R") resetGame();
+});
+
+function drawSnakePart(part) {
+  ctx.fillStyle = snakeColor;
+  ctx.shadowColor = snakeColor; // неоновое свечение
+  ctx.shadowBlur = 15;
+  ctx.fillRect(part.x, part.y, cellSize, cellSize);
+  ctx.shadowBlur = 0; // сбросить свечение после отрисовки
 }
 
 function changeDirection(event) {
-  const LEFT_KEY = 37;
-  const RIGHT_KEY = 39;
-  const UP_KEY = 38;
-  const DOWN_KEY = 40;
+  const LEFT = 37, UP = 38, RIGHT = 39, DOWN = 40;
+  const goingUp = dy === -cellSize, goingDown = dy === cellSize;
+  const goingRight = dx === cellSize, goingLeft = dx === -cellSize;
 
-  const keyPressed = event.keyCode;
-  const goingUp = dy === -10;
-  const goingDown = dy === 10;
-  const goingRight = dx === 10;
-  const goingLeft = dx === -10;
-
-  if (keyPressed === LEFT_KEY && !goingRight) {
-    dx = -10;
-    dy = 0;
-  } else if (keyPressed === UP_KEY && !goingDown) {
-    dx = 0;
-    dy = -10;
-  } else if (keyPressed === RIGHT_KEY && !goingLeft) {
-    dx = 10;
-    dy = 0;
-  } else if (keyPressed === DOWN_KEY && !goingUp) {
-    dx = 0;
-    dy = 10;
-  }
+  if (event.keyCode === LEFT && !goingRight) { dx = -cellSize; dy = 0; }
+  else if (event.keyCode === UP && !goingDown) { dx = 0; dy = -cellSize; }
+  else if (event.keyCode === RIGHT && !goingLeft) { dx = cellSize; dy = 0; }
+  else if (event.keyCode === DOWN && !goingUp) { dx = 0; dy = cellSize; }
 }
-let isGolden = false;
 
 function advanceSnake() {
   const head = { x: snake[0].x + dx, y: snake[0].y + dy };
   snake.unshift(head);
-  
-  const didEatFood = snake[0].x === foodX && snake[0].y === foodY;
 
-  if (didEatFood) {
-    score += isGolden ? 30 : 10;
-    document.getElementById("score").innerHTML = score;
+  if (head.x === foodX && head.y === foodY) {
+    score += 10;
+    document.getElementById("score").textContent = score;
     createFood();
-
-  if (isGolden && speed > 40) {
-    speed -=10;
-  }
-  }
-   else {
+    if (speed > 40) speed -= 3;
+    snakeColor = randomColor();
+  } else {
     snake.pop();
   }
 }
@@ -82,71 +71,72 @@ function drawSnake() {
   snake.forEach(drawSnakePart);
 }
 
-let score = 0;
-
-// mat
 function randomTen(min, max) {
   return Math.round((Math.random() * (max - min) + min) / 10) * 10;
 }
 
-
 function createFood() {
   foodX = randomTen(0, canvas.width - 10);
   foodY = randomTen(0, canvas.height - 10);
-  isGolden = Math.random() < 0.2;
-
-  snake.forEach(function isFoodOnSnake(part) {
-    const foodIsOnSnake = part.x == foodX && part.y == foodY;
-    if (foodIsOnSnake) createFood();
-  });
 }
 
 function drawFood(x, y) {
-  ctx.fillStyle = isGolden ? "gold" : "red";
-  ctx.strokeStyle = isGolden ? "orange" : "darkred";
+  ctx.fillStyle = "red";
+  ctx.shadowColor = "red";
+  ctx.shadowBlur = 20;
   ctx.fillRect(x, y, 10, 10);
-  ctx.strokeRect(x, y, 10, 10);
+  ctx.shadowBlur = 0;
 }
 
 function didGameEnd() {
   for (let i = 4; i < snake.length; i++) {
-    const didCollide = snake[i].x === snake[0].x && snake[i].y === snake[0].y;
-    if (didCollide) return true;
+    if (snake[i].x === snake[0].x && snake[i].y === snake[0].y) return true;
   }
-  const hitLeftWall = snake[0].x < 0;
-  const hitRightWall = snake[0].x > gameCanvas.width - 10;
-  const hitToptWall = snake[0].y < 0;
-  const hitBottomWall = snake[0].y > gameCanvas.height - 10;
-  return hitLeftWall || hitRightWall || hitToptWall || hitBottomWall;
+  return (
+    snake[0].x < 0 ||
+    snake[0].x > canvas.width - 10 ||
+    snake[0].y < 0 ||
+    snake[0].y > canvas.height - 10
+  );
 }
-let speed = 100;
+
+function showYouDied() {
+  youDiedText.style.opacity = 1;
+}
+
+function hideYouDied() {
+  youDiedText.style.opacity = 0;
+}
+
+function randomColor() {
+  const colors = ["lime", "cyan", "yellow", "magenta", "orange"];
+  return colors[Math.floor(Math.random() * colors.length)];
+}
 
 function main() {
-  if (didGameEnd()) return;
+  if (didGameEnd()) {
+    gameOver = true;
+    showYouDied();
+    return;
+  }
 
-  setTimeout(function onTick() {
+  setTimeout(() => {
     clearCanvas();
     drawFood(foodX, foodY);
     advanceSnake();
     drawSnake();
-    main();
-  }, 100);
+    if (!gameOver) main();
+  }, speed);
 }
 
-
-document.addEventListener("keydown", changeDirection);
-createFood();
-main();
-
-
-resetBtn.addEventListener("click", resetGame);
-document.addEventListener("keydown", function (event) {
-  if (event.key === "r" || event.key === "R") {
-    resetGame();
-  }
-});
-
 function resetGame() {
+  gameOver = false;
+  hideYouDied();
+  speed = 100;
+  dx = cellSize;
+  dy = 0;
+  score = 0;
+  document.getElementById("score").textContent = score;
   snake = [
     { x: 150, y: 150 },
     { x: 140, y: 150 },
@@ -154,12 +144,11 @@ function resetGame() {
     { x: 120, y: 150 },
     { x: 110, y: 150 },
   ];
-  dx = cellSize;
-  dy = 0;
-  score = 0;
-  document.getElementById("score").innerHTML = score;
   createFood();
   clearCanvas();
   drawSnake();
   main();
 }
+
+createFood();
+main();
