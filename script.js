@@ -1,6 +1,8 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
+let resetBtn = document.getElementById("reset")
+
 const cellSize = 10;
 let dx = cellSize;
 let dy = 0;
@@ -120,6 +122,27 @@ function main() {
   }, 100);
 }
 
+
 document.addEventListener("keydown", changeDirection);
 createFood();
 main();
+
+resetBtn.addEventListener("click", resetGame);
+
+function resetGame() {
+  snake = [
+    { x: 150, y: 150 },
+    { x: 140, y: 150 },
+    { x: 130, y: 150 },
+    { x: 120, y: 150 },
+    { x: 110, y: 150 },
+  ];
+  dx = cellSize;
+  dy = 0;
+  score = 0;
+  document.getElementById("score").innerHTML = score;
+  createFood();
+  clearCanvas();
+  drawSnake();
+  main();
+}
