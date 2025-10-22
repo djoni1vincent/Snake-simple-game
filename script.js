@@ -51,16 +51,24 @@ function changeDirection(event) {
     dy = 10;
   }
 }
+let isGolden = false;
 
 function advanceSnake() {
   const head = { x: snake[0].x + dx, y: snake[0].y + dy };
   snake.unshift(head);
+  
   const didEatFood = snake[0].x === foodX && snake[0].y === foodY;
+
   if (didEatFood) {
-    score += 10;
+    score += isGolden ? 30 : 10;
     document.getElementById("score").innerHTML = score;
     createFood();
-  } else {
+
+  if (isGolden && speed > 40) {
+    speed -=10;
+  }
+  }
+   else {
     snake.pop();
   }
 }
@@ -81,9 +89,11 @@ function randomTen(min, max) {
   return Math.round((Math.random() * (max - min) + min) / 10) * 10;
 }
 
+
 function createFood() {
   foodX = randomTen(0, canvas.width - 10);
   foodY = randomTen(0, canvas.height - 10);
+  isGolden = Math.random() < 0.2;
 
   snake.forEach(function isFoodOnSnake(part) {
     const foodIsOnSnake = part.x == foodX && part.y == foodY;
@@ -92,8 +102,8 @@ function createFood() {
 }
 
 function drawFood(x, y) {
-  ctx.fillStyle = "red";
-  ctx.strokeStyle = "darkred";
+  ctx.fillStyle = isGolden ? "gold" : "red";
+  ctx.strokeStyle = isGolden ? "orange" : "darkred";
   ctx.fillRect(x, y, 10, 10);
   ctx.strokeRect(x, y, 10, 10);
 }
@@ -109,6 +119,7 @@ function didGameEnd() {
   const hitBottomWall = snake[0].y > gameCanvas.height - 10;
   return hitLeftWall || hitRightWall || hitToptWall || hitBottomWall;
 }
+let speed = 100;
 
 function main() {
   if (didGameEnd()) return;
@@ -127,7 +138,13 @@ document.addEventListener("keydown", changeDirection);
 createFood();
 main();
 
+
 resetBtn.addEventListener("click", resetGame);
+document.addEventListener("keydown", function (event) {
+  if (event.key === "r" || event.key === "R") {
+    resetGame();
+  }
+});
 
 function resetGame() {
   snake = [
