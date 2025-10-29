@@ -9,6 +9,7 @@ let dy = 0;
 let speed = 100;
 let score = 0;
 let gameOver = false;
+let changingDirection = false;
 
 let snake = [
   { x: 150, y: 150 },
@@ -30,16 +31,21 @@ document.addEventListener("keydown", (e) => {
 
 function drawSnakePart(part) {
   ctx.fillStyle = snakeColor;
-  ctx.shadowColor = snakeColor; // неоновое свечение
+  ctx.shadowColor = snakeColor; 
   ctx.shadowBlur = 15;
   ctx.fillRect(part.x, part.y, cellSize, cellSize);
-  ctx.shadowBlur = 0; // сбросить свечение после отрисовки
+  ctx.shadowBlur = 0;
 }
 
 function changeDirection(event) {
   const LEFT = 37, UP = 38, RIGHT = 39, DOWN = 40;
-  const goingUp = dy === -cellSize, goingDown = dy === cellSize;
-  const goingRight = dx === cellSize, goingLeft = dx === -cellSize;
+  if (changingDirection) return; 
+  changingDirection = true;
+
+  const goingUp = dy === -cellSize;
+  const goingDown = dy === cellSize;
+  const goingRight = dx === cellSize;
+  const goingLeft = dx === -cellSize;
 
   if (event.keyCode === LEFT && !goingRight) { dx = -cellSize; dy = 0; }
   else if (event.keyCode === UP && !goingDown) { dx = 0; dy = -cellSize; }
@@ -121,6 +127,7 @@ function main() {
   }
 
   setTimeout(() => {
+    changingDirection = false; // 👈 предотвращает двойной поворот
     clearCanvas();
     drawFood(foodX, foodY);
     advanceSnake();
@@ -136,6 +143,7 @@ function resetGame() {
   dx = cellSize;
   dy = 0;
   score = 0;
+  changingDirection = false;
   document.getElementById("score").textContent = score;
   snake = [
     { x: 150, y: 150 },
